@@ -1,4 +1,30 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+function resolveApiUrl() {
+  const configuredUrl = process.env.NEXT_PUBLIC_API_URL?.trim();
+
+  if (!configuredUrl) {
+    if (process.env.NODE_ENV === 'development') {
+      return 'http://localhost:4000/api';
+    }
+
+    throw new Error(
+      'NEXT_PUBLIC_API_URL es obligatoria en producción. Configúrala con la URL pública del backend.'
+    );
+  }
+
+  if (!/^https?:\/\//i.test(configuredUrl)) {
+    throw new Error('NEXT_PUBLIC_API_URL debe comenzar con http:// o https://.');
+  }
+
+  try {
+    new URL(configuredUrl);
+  } catch {
+    throw new Error('NEXT_PUBLIC_API_URL debe contener una URL HTTP(S) válida.');
+  }
+
+  return configuredUrl.replace(/\/+$/, '');
+}
+
+const API_URL = resolveApiUrl();
 
 // Trae todos los cursos. revalidate: 60 => ISR (regenera cada 60s).
 export async function getCourses() {
