@@ -53,6 +53,8 @@ Andrés Oliver Trujillo Torres realizó la preparación de la carpeta, la revisi
 
 Las mejoras, correcciones, documentación y despliegues restantes serán distribuidos entre los cinco integrantes mediante ramas y commits individuales.
 
+La distribución detallada de responsabilidades y ramas se encuentra en [docs/distribucion-trabajo.md](docs/distribucion-trabajo.md).
+
 ## 6. Instalación local
 
 Requisitos: Node.js 18+ y una cuenta de MongoDB Atlas.
