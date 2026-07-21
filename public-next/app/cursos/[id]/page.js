@@ -10,7 +10,8 @@ export async function generateStaticParams() {
 export const revalidate = 60;
 
 export default async function CursoDetalle({ params }) {
-  const course = await getCourse(params.id);
+  const { id } = await params;
+  const course = await getCourse(id);
   if (!course) {
     return (
       <div className="container">
