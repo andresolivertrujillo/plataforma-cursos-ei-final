@@ -30,6 +30,10 @@ export default function CourseDetail() {
       navigate('/login');
       return;
     }
+    if (user.role !== 'student') {
+      navigate('/acceso-denegado');
+      return;
+    }
     setEnrolling(true);
     try {
       await apiFetch('/enrollments', { method: 'POST', auth: true, body: { courseId: id } });
@@ -59,9 +63,13 @@ export default function CourseDetail() {
       {msg && <p className="success">{msg}</p>}
       {error && <p className="error">{error}</p>}
       <div className="actions-row">
-        <button onClick={handleEnroll} disabled={enrolling}>
-          {enrolling ? 'Inscribiendo...' : 'Inscribirme'}
-        </button>
+        {user && user.role !== 'student' ? (
+          <Link to="/acceso-denegado" className="btn-link">Portal exclusivo para estudiantes</Link>
+        ) : (
+          <button onClick={handleEnroll} disabled={enrolling}>
+            {enrolling ? 'Inscribiendo...' : 'Inscribirme'}
+          </button>
+        )}
         {msg && <Link to="/mis-inscripciones" className="btn-link">Ver mis inscripciones</Link>}
       </div>
     </div>
