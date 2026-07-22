@@ -1,13 +1,16 @@
 import { useEffect, useState } from 'react';
 import { apiFetch } from '../api/client';
+import Spinner from '../components/Spinner';
 
 export default function MyEnrollments() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [cancelingId, setCancelingId] = useState(null);
 
   async function load() {
     setLoading(true);
+    setError('');
     try {
       const data = await apiFetch('/enrollments/mine', { auth: true });
       setItems(data);
@@ -21,15 +24,19 @@ export default function MyEnrollments() {
   useEffect(() => { load(); }, []);
 
   async function cancel(id) {
+    setError('');
+    setCancelingId(id);
     try {
       await apiFetch(`/enrollments/${id}`, { method: 'DELETE', auth: true });
-      load();
+      await load();
     } catch (err) {
       setError(err.message);
+    } finally {
+      setCancelingId(null);
     }
   }
 
-  if (loading) return <p>Cargando...</p>;
+  if (loading) return <Spinner label="Cargando tus inscripciones..." />;
 
   return (
     <div>
@@ -43,7 +50,9 @@ export default function MyEnrollments() {
             <p className="muted">Estado: {e.status}</p>
             {e.course && <p>{e.course.category} - {e.course.credits} creditos</p>}
             {e.status === 'inscrito' && (
-              <button className="danger" onClick={() => cancel(e._id)}>Cancelar</button>
+              <button className="danger" onClick={() => cancel(e._id)} disabled={cancelingId === e._id}>
+                {cancelingId === e._id ? 'Cancelando...' : 'Cancelar'}
+              </button>
             )}
           </div>
         ))}

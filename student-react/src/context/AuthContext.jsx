@@ -1,5 +1,5 @@
 // Estado global de autenticacion con Context API (requisito del profesor)
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { apiFetch } from '../api/client';
 
 const AuthContext = createContext(null);
@@ -8,7 +8,12 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Al cargar, si hay token intenta recuperar el perfil
+  const logout = useCallback(() => {
+    localStorage.removeItem('token');
+    setUser(null);
+  }, []);
+
+  // Al cargar, si hay token intenta recuperar el perfil (persistencia de sesion)
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -20,6 +25,15 @@ export function AuthProvider({ children }) {
       .catch(() => localStorage.removeItem('token'))
       .finally(() => setLoading(false));
   }, []);
+
+  // Si cualquier peticion autenticada responde 401, cerramos sesion automaticamente
+  useEffect(() => {
+    function handleUnauthorized() {
+      logout();
+    }
+    window.addEventListener('auth:unauthorized', handleUnauthorized);
+    return () => window.removeEventListener('auth:unauthorized', handleUnauthorized);
+  }, [logout]);
 
   async function login(email, password) {
     const data = await apiFetch('/auth/login', { method: 'POST', body: { email, password } });
@@ -33,11 +47,6 @@ export function AuthProvider({ children }) {
     localStorage.setItem('token', data.token);
     setUser(data.user);
     return data.user;
-  }
-
-  function logout() {
-    localStorage.removeItem('token');
-    setUser(null);
   }
 
   return (

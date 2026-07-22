@@ -1,36 +1,49 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { apiFetch } from '../api/client';
 import { useAuth } from '../context/AuthContext';
+import Spinner from '../components/Spinner';
 
 export default function CourseDetail() {
   const { id } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [course, setCourse] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [enrolling, setEnrolling] = useState(false);
   const [msg, setMsg] = useState('');
   const [error, setError] = useState('');
 
   useEffect(() => {
+    setLoading(true);
+    setError('');
     apiFetch(`/courses/${id}`)
       .then(setCourse)
-      .catch((e) => setError(e.message));
+      .catch((e) => setError(e.message))
+      .finally(() => setLoading(false));
   }, [id]);
 
   async function handleEnroll() {
     setMsg('');
     setError('');
-    if (!user) return navigate('/login');
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    setEnrolling(true);
     try {
       await apiFetch('/enrollments', { method: 'POST', auth: true, body: { courseId: id } });
       setMsg('Inscripcion realizada con exito.');
     } catch (err) {
       setError(err.message);
+    } finally {
+      setEnrolling(false);
     }
   }
 
-  if (error) return <p className="error">{error}</p>;
-  if (!course) return <p>Cargando...</p>;
+  if (loading) return <Spinner label="Cargando curso..." />;
+  if (error && !course) return <p className="error">{error}</p>;
+  if (!course) return null;
 
   return (
     <div className="card detail-card">
@@ -45,7 +58,12 @@ export default function CourseDetail() {
       </ul>
       {msg && <p className="success">{msg}</p>}
       {error && <p className="error">{error}</p>}
-      <button onClick={handleEnroll}>Inscribirme</button>
+      <div className="actions-row">
+        <button onClick={handleEnroll} disabled={enrolling}>
+          {enrolling ? 'Inscribiendo...' : 'Inscribirme'}
+        </button>
+        {msg && <Link to="/mis-inscripciones" className="btn-link">Ver mis inscripciones</Link>}
+      </div>
     </div>
   );
 }

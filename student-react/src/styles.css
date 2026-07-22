@@ -44,3 +44,14 @@ button:disabled { opacity: .6; cursor: not-allowed; }
 .error { color: var(--danger); background: #fee2e2; padding: 8px 12px; border-radius: 8px; }
 .success { color: #166534; background: #dcfce7; padding: 8px 12px; border-radius: 8px; }
 h1 { font-size: 26px; }
+
+.field-error { display: block; color: var(--danger); font-size: 12px; margin-top: 4px; }
+.actions-row { display: flex; align-items: center; gap: 16px; margin-top: 12px; }
+
+.spinner-wrap { display: flex; align-items: center; gap: 10px; padding: 24px 0; color: var(--muted); }
+.spinner {
+  width: 18px; height: 18px; border-radius: 50%;
+  border: 3px solid #cbd5e1; border-top-color: var(--primary);
+  animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
