@@ -7,8 +7,8 @@ import { UsersComponent } from './pages/users/users.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
-  { path: '', component: DashboardComponent, canActivate: [adminGuard] },
-  { path: 'cursos', component: CoursesComponent, canActivate: [adminGuard] },
-  { path: 'usuarios', component: UsersComponent, canActivate: [adminGuard] },
+  { path: '', component: DashboardComponent },
+  { path: 'cursos', component: CoursesComponent },
+  { path: 'usuarios', component: UsersComponent },
   { path: '**', redirectTo: '' },
 ];
