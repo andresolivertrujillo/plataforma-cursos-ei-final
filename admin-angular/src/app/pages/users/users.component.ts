@@ -1,7 +1,11 @@
 import { Component, OnInit, inject } from '@angular/core';
 
-import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { AbstractControl, ReactiveFormsModule, FormBuilder, ValidationErrors, Validators } from '@angular/forms';
 import { UserService, AppUser } from '../../services/user.service';
+
+function trimmedRequired(control: AbstractControl): ValidationErrors | null {
+  return typeof control.value === 'string' && control.value.trim() ? null : { trimmedRequired: true };
+}
 
 @Component({
     selector: 'app-users',
@@ -21,7 +25,15 @@ import { UserService, AppUser } from '../../services/user.service';
         <form [formGroup]="form" (ngSubmit)="save()">
           <div class="row">
             <label>Nombre <input formControlName="name" /></label>
-            <label>Correo <input type="email" formControlName="email" /></label>
+            <label>Correo
+              <input type="email" formControlName="email" />
+              @if ((form.get('email')?.dirty || submitted) && form.get('email')?.hasError('required')) {
+                <small class="field-error">El correo es obligatorio.</small>
+              }
+              @if ((form.get('email')?.dirty || submitted) && !form.get('email')?.hasError('required') && form.get('email')?.hasError('email')) {
+                <small class="field-error">Ingresa un correo valido.</small>
+              }
+            </label>
           </div>
           <div class="row">
             <label>Rol
@@ -56,10 +68,11 @@ import { UserService, AppUser } from '../../services/user.service';
       </div>
 
       <div class="card">
-        <table>
+        <div class="table-scroll" tabindex="0" aria-label="Tabla de usuarios">
+          <table>
           <thead><tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Acciones</th></tr></thead>
           <tbody>
-            @for (u of users; track u) {
+            @for (u of users; track u._id) {
               <tr>
                 <td>{{ u.name }}</td>
                 <td>{{ u.email }}</td>
@@ -74,7 +87,8 @@ import { UserService, AppUser } from '../../services/user.service';
               <tr><td colspan="4">No hay usuarios.</td></tr>
             }
           </tbody>
-        </table>
+          </table>
+        </div>
       </div>
     </div>
     `
@@ -88,7 +102,7 @@ export class UsersComponent implements OnInit {
 
   private fb = inject(FormBuilder);
   form = this.fb.group({
-    name: ['', Validators.required],
+    name: ['', [Validators.required, trimmedRequired]],
     email: ['', [Validators.required, Validators.email]],
     role: ['student', Validators.required],
     password: ['', [Validators.required, Validators.minLength(6)]],
@@ -109,11 +123,20 @@ export class UsersComponent implements OnInit {
 
   save() {
     this.submitted = true;
+    const raw = this.form.getRawValue();
+    this.form.patchValue(
+      {
+        name: raw.name?.trim() ?? '',
+        email: raw.email?.trim() ?? '',
+      },
+      { emitEvent: false }
+    );
+    this.form.updateValueAndValidity();
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
-    const v = this.form.value;
+    const v = this.form.getRawValue();
     if (this.editingId) {
       this.srv.update(this.editingId, { name: v.name!, email: v.email!, role: v.role! }).subscribe({
         next: () => { this.message = 'Usuario actualizado'; this.cancelEdit(); this.load(); },
