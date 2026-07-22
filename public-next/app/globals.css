@@ -13,3 +13,7 @@ a { color: var(--primary); }
 .muted { color: var(--muted); font-size: 14px; }
 .btn { display: inline-block; margin-top: 24px; background: #fff; color: var(--primary); padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 700; }
 .back { display: inline-block; margin-bottom: 16px; text-decoration: none; }
+.state-card { max-width: 600px; margin: 24px auto; }
+.state-actions { display: flex; align-items: center; gap: 16px; margin-top: 20px; }
+.action-button { background: var(--primary); color: #fff; border: 0; border-radius: 8px; padding: 10px 16px; cursor: pointer; font: inherit; }
+.action-button:hover { background: #1e40af; }

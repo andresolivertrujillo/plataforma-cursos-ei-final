@@ -10,7 +10,7 @@ export default async function CursosPage() {
     <div className="container">
       <Link href="/" className="back">&larr; Inicio</Link>
       <h1>Catalogo de cursos</h1>
-      {courses.length === 0 && <p className="muted">No hay cursos disponibles o la API no responde.</p>}
+      {courses.length === 0 && <p className="muted">No hay cursos disponibles.</p>}
       <div className="grid">
         {courses.map((c) => (
           <div key={c._id} className="card">
