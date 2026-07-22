@@ -35,10 +35,27 @@ export async function createCourse(req, res, next) {
   }
 }
 
+const UPDATABLE_COURSE_FIELDS = [
+  'title',
+  'description',
+  'category',
+  'instructor',
+  'credits',
+  'capacity',
+  'price',
+  'active',
+];
+
 // PUT /api/courses/:id  (solo admin)
 export async function updateCourse(req, res, next) {
   try {
-    const course = await Course.findByIdAndUpdate(req.params.id, req.body, {
+    // Solo se aceptan campos conocidos del modelo, aunque el body traiga otros
+    const updates = {};
+    for (const field of UPDATABLE_COURSE_FIELDS) {
+      if (req.body[field] !== undefined) updates[field] = req.body[field];
+    }
+
+    const course = await Course.findByIdAndUpdate(req.params.id, updates, {
       new: true,
       runValidators: true,
     });

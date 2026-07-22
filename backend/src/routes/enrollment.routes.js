@@ -8,6 +8,7 @@ import {
 } from '../controllers/enrollment.controller.js';
 import { verifyToken, requireRole } from '../middlewares/auth.js';
 import { handleValidation } from '../utils/validate.js';
+import { validateObjectId } from '../middlewares/validateObjectId.js';
 
 const router = Router();
 
@@ -16,12 +17,12 @@ router.post(
   '/',
   verifyToken,
   requireRole('student'),
-  [body('courseId').notEmpty().withMessage('courseId es obligatorio')],
+  [body('courseId').notEmpty().withMessage('courseId es obligatorio').isMongoId().withMessage('courseId invalido')],
   handleValidation,
   enroll
 );
 router.get('/mine', verifyToken, requireRole('student'), myEnrollments);
-router.delete('/:id', verifyToken, requireRole('student'), cancelEnrollment);
+router.delete('/:id', verifyToken, requireRole('student'), validateObjectId('id'), cancelEnrollment);
 
 // Admin
 router.get('/', verifyToken, requireRole('admin'), listAllEnrollments);

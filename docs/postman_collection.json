@@ -1,112 +1,995 @@
 {
   "info": {
     "name": "Plataforma de Cursos - API",
+    "description": "Coleccion de pruebas para la API REST (Parte 1 - Backend y seguridad). Incluye flujos felices, validaciones, control de roles y casos de error (IDs invalidos, reinscripcion tras cancelar, etc).",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    { "key": "baseUrl", "value": "http://localhost:4000/api" },
-    { "key": "token", "value": "" },
-    { "key": "adminToken", "value": "" },
-    { "key": "adminEmail", "value": "" },
-    { "key": "adminPassword", "value": "" },
-    { "key": "studentEmail", "value": "" },
-    { "key": "studentPassword", "value": "" },
-    { "key": "courseId", "value": "" }
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:4000/api"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "adminToken",
+      "value": ""
+    },
+    {
+      "key": "adminEmail",
+      "value": ""
+    },
+    {
+      "key": "adminPassword",
+      "value": ""
+    },
+    {
+      "key": "studentEmail",
+      "value": ""
+    },
+    {
+      "key": "studentPassword",
+      "value": ""
+    },
+    {
+      "key": "courseId",
+      "value": ""
+    },
+    {
+      "key": "enrollmentId",
+      "value": ""
+    },
+    {
+      "key": "userId",
+      "value": ""
+    },
+    {
+      "key": "invalidId",
+      "value": "abc123-no-es-un-objectid"
+    }
   ],
   "item": [
     {
-      "name": "Auth - Register (estudiante)",
-      "request": {
-        "method": "POST",
-        "header": [{ "key": "Content-Type", "value": "application/json" }],
-        "url": "{{baseUrl}}/auth/register",
-        "body": { "mode": "raw", "raw": "{\n  \"name\": \"Nuevo Estudiante\",\n  \"email\": \"{{studentEmail}}\",\n  \"password\": \"{{studentPassword}}\"\n}" }
-      }
+      "name": "0. Sistema",
+      "item": [
+        {
+          "name": "Health check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/health"
+          }
+        }
+      ]
     },
     {
-      "name": "Auth - Login (guarda token)",
-      "event": [{ "listen": "test", "script": { "exec": ["const d = pm.response.json();", "if (d.token) pm.collectionVariables.set('token', d.token);"] } }],
-      "request": {
-        "method": "POST",
-        "header": [{ "key": "Content-Type", "value": "application/json" }],
-        "url": "{{baseUrl}}/auth/login",
-        "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{studentEmail}}\",\n  \"password\": \"{{studentPassword}}\"\n}" }
-      }
+      "name": "1. Auth",
+      "item": [
+        {
+          "name": "Register (estudiante)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nuevo Estudiante\",\n  \"email\": \"{{studentEmail}}\",\n  \"password\": \"{{studentPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Register - datos invalidos (400 esperado)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"\",\n  \"email\": \"no-es-un-email\",\n  \"password\": \"123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Login estudiante (guarda token)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{studentEmail}}\",\n  \"password\": \"{{studentPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const d = pm.response.json();",
+                  "if (d.token) pm.collectionVariables.set('token', d.token);",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Devuelve token', () => pm.expect(d.token).to.be.a('string'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login ADMIN (guarda adminToken)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const d = pm.response.json();",
+                  "if (d.token) pm.collectionVariables.set('adminToken', d.token);",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login - credenciales incorrectas (401 esperado)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{studentEmail}}\",\n  \"password\": \"clave-incorrecta\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Perfil autenticado (/me)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/me"
+          }
+        },
+        {
+          "name": "Perfil sin token (401 esperado)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/auth/me"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
     },
     {
-      "name": "Auth - Login ADMIN (guarda adminToken)",
-      "event": [{ "listen": "test", "script": { "exec": ["const d = pm.response.json();", "if (d.token) pm.collectionVariables.set('adminToken', d.token);"] } }],
-      "request": {
-        "method": "POST",
-        "header": [{ "key": "Content-Type", "value": "application/json" }],
-        "url": "{{baseUrl}}/auth/login",
-        "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}" }
-      }
+      "name": "2. Cursos",
+      "item": [
+        {
+          "name": "Listar cursos (publico)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/courses"
+          }
+        },
+        {
+          "name": "Crear curso (admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/courses",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Curso de prueba\",\n  \"description\": \"Descripcion\",\n  \"category\": \"General\",\n  \"instructor\": \"Docente\",\n  \"credits\": 3,\n  \"capacity\": 2,\n  \"price\": 0\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const d = pm.response.json();",
+                  "if (d._id) pm.collectionVariables.set('courseId', d._id);",
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear curso sin token (401 esperado)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/courses",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"x\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear curso como estudiante (403 esperado)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/courses",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"No deberia crearse\",\n  \"description\": \"x\",\n  \"category\": \"x\",\n  \"instructor\": \"x\",\n  \"credits\": 3,\n  \"capacity\": 10\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener curso por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/courses/{{courseId}}"
+          }
+        },
+        {
+          "name": "Obtener curso - ID invalido (400 esperado)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/courses/{{invalidId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar curso (admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/courses/{{courseId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"price\": 99\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar curso - dato invalido (400 esperado)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/courses/{{courseId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"credits\": 999,\n  \"title\": \"   \"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar curso - ID invalido (400 esperado)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/courses/{{invalidId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"price\": 10\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar curso - ID invalido (400 esperado)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/courses/{{invalidId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
     },
     {
-      "name": "Courses - Listar (publico)",
-      "request": { "method": "GET", "url": "{{baseUrl}}/courses" }
+      "name": "3. Inscripciones",
+      "item": [
+        {
+          "name": "Inscribirse a un curso (estudiante)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/enrollments",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"courseId\": \"{{courseId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const d = pm.response.json();",
+                  "if (d._id) pm.collectionVariables.set('enrollmentId', d._id);",
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Queda inscrito', () => pm.expect(d.status).to.eql('inscrito'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Inscribirse de nuevo al mismo curso (409 esperado)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/enrollments",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"courseId\": \"{{courseId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 409', () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Mis inscripciones",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/enrollments/mine"
+          }
+        },
+        {
+          "name": "Cancelar inscripcion",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/enrollments/{{enrollmentId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const d = pm.response.json();",
+                  "pm.test('Queda cancelado', () => pm.expect(d.enrollment.status).to.eql('cancelado'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reinscribirse tras cancelar (bug corregido: debe ser 201, no 409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/enrollments",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"courseId\": \"{{courseId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201 (reactiva la inscripcion, no falla por duplicado)', () => pm.response.to.have.status(201));",
+                  "const d = pm.response.json();",
+                  "pm.test('Vuelve a inscrito', () => pm.expect(d.status).to.eql('inscrito'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cancelar inscripcion - ID invalido (400 esperado)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/enrollments/{{invalidId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Inscribirse - courseId invalido (400 esperado)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/enrollments",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"courseId\": \"{{invalidId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar todas las inscripciones (admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/enrollments"
+          }
+        },
+        {
+          "name": "Listar todas las inscripciones como estudiante (403 esperado)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/enrollments"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
     },
     {
-      "name": "Courses - Crear (admin)",
-      "event": [{ "listen": "test", "script": { "exec": ["const d = pm.response.json();", "if (d._id) pm.collectionVariables.set('courseId', d._id);"] } }],
-      "request": {
-        "method": "POST",
-        "header": [
-          { "key": "Content-Type", "value": "application/json" },
-          { "key": "Authorization", "value": "Bearer {{adminToken}}" }
-        ],
-        "url": "{{baseUrl}}/courses",
-        "body": { "mode": "raw", "raw": "{\n  \"title\": \"Curso de prueba\",\n  \"description\": \"Descripcion\",\n  \"category\": \"General\",\n  \"instructor\": \"Docente\",\n  \"credits\": 3,\n  \"capacity\": 20,\n  \"price\": 0\n}" }
-      }
-    },
-    {
-      "name": "Courses - Actualizar (admin)",
-      "request": {
-        "method": "PUT",
-        "header": [
-          { "key": "Content-Type", "value": "application/json" },
-          { "key": "Authorization", "value": "Bearer {{adminToken}}" }
-        ],
-        "url": "{{baseUrl}}/courses/{{courseId}}",
-        "body": { "mode": "raw", "raw": "{\n  \"price\": 99\n}" }
-      }
-    },
-    {
-      "name": "Enrollments - Inscribirse (estudiante)",
-      "request": {
-        "method": "POST",
-        "header": [
-          { "key": "Content-Type", "value": "application/json" },
-          { "key": "Authorization", "value": "Bearer {{token}}" }
-        ],
-        "url": "{{baseUrl}}/enrollments",
-        "body": { "mode": "raw", "raw": "{\n  \"courseId\": \"{{courseId}}\"\n}" }
-      }
-    },
-    {
-      "name": "Enrollments - Mis inscripciones",
-      "request": {
-        "method": "GET",
-        "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
-        "url": "{{baseUrl}}/enrollments/mine"
-      }
-    },
-    {
-      "name": "Users - Listar (admin)",
-      "request": {
-        "method": "GET",
-        "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
-        "url": "{{baseUrl}}/users"
-      }
-    },
-    {
-      "name": "Courses - Eliminar (admin)",
-      "request": {
-        "method": "DELETE",
-        "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
-        "url": "{{baseUrl}}/courses/{{courseId}}"
-      }
+      "name": "4. Usuarios (admin)",
+      "item": [
+        {
+          "name": "Listar usuarios",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/users"
+          }
+        },
+        {
+          "name": "Crear usuario",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/users",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Usuario Nuevo\",\n  \"email\": \"usuario.nuevo@ejemplo.com\",\n  \"password\": \"clave123\",\n  \"role\": \"student\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const d = pm.response.json();",
+                  "if (d.id) pm.collectionVariables.set('userId', d.id);",
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar usuario",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/users/{{userId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Usuario Actualizado\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar usuario - rol invalido (400 esperado)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/users/{{userId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"superadmin\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar usuario - ID invalido (400 esperado)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/users/{{invalidId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"x\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar usuario",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/users/{{userId}}"
+          }
+        },
+        {
+          "name": "Listar usuarios sin token (401 esperado)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/users"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
     }
   ]
 }
