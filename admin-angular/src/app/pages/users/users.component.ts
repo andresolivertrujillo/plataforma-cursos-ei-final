@@ -1,17 +1,20 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { UserService, AppUser } from '../../services/user.service';
 
 @Component({
-  selector: 'app-users',
-  standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
-  template: `
+    selector: 'app-users',
+    imports: [ReactiveFormsModule],
+    template: `
     <div class="container">
       <h1>Gestion de usuarios (CRUD)</h1>
-      <p class="error" *ngIf="error">{{ error }}</p>
-      <p class="success" *ngIf="message">{{ message }}</p>
+      @if (error) {
+        <p class="error">{{ error }}</p>
+      }
+      @if (message) {
+        <p class="success">{{ message }}</p>
+      }
 
       <div class="card">
         <h3>{{ editingId ? 'Editar usuario' : 'Nuevo usuario' }}</h3>
@@ -27,21 +30,27 @@ import { UserService, AppUser } from '../../services/user.service';
                 <option value="admin">Administrador</option>
               </select>
             </label>
-            <label *ngIf="!editingId">Contrasena
-              <input type="password" formControlName="password" />
-              <small
-                class="error"
-                *ngIf="(form.get('password')?.touched || submitted) && form.get('password')?.hasError('required')"
-              >La contrasena es obligatoria.</small>
-              <small
-                class="error"
-                *ngIf="(form.get('password')?.touched || submitted) && !form.get('password')?.hasError('required') && form.get('password')?.hasError('minlength')"
-              >La contrasena debe tener al menos 6 caracteres.</small>
-            </label>
+            @if (!editingId) {
+              <label>Contrasena
+                <input type="password" formControlName="password" />
+                @if ((form.get('password')?.touched || submitted) && form.get('password')?.hasError('required')) {
+                  <small
+                    class="error"
+                  >La contrasena es obligatoria.</small>
+                }
+                @if ((form.get('password')?.touched || submitted) && !form.get('password')?.hasError('required') && form.get('password')?.hasError('minlength')) {
+                  <small
+                    class="error"
+                  >La contrasena debe tener al menos 6 caracteres.</small>
+                }
+              </label>
+            }
           </div>
           <div class="actions" style="margin-top:12px">
             <button type="submit" [disabled]="form.invalid">{{ editingId ? 'Actualizar' : 'Crear' }}</button>
-            <button type="button" class="secondary" *ngIf="editingId" (click)="cancelEdit()">Cancelar</button>
+            @if (editingId) {
+              <button type="button" class="secondary" (click)="cancelEdit()">Cancelar</button>
+            }
           </div>
         </form>
       </div>
@@ -50,21 +59,25 @@ import { UserService, AppUser } from '../../services/user.service';
         <table>
           <thead><tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Acciones</th></tr></thead>
           <tbody>
-            <tr *ngFor="let u of users">
-              <td>{{ u.name }}</td>
-              <td>{{ u.email }}</td>
-              <td>{{ u.role }}</td>
-              <td class="actions">
-                <button (click)="edit(u)">Editar</button>
-                <button class="danger" (click)="remove(u)">Eliminar</button>
-              </td>
-            </tr>
-            <tr *ngIf="users.length === 0"><td colspan="4">No hay usuarios.</td></tr>
+            @for (u of users; track u) {
+              <tr>
+                <td>{{ u.name }}</td>
+                <td>{{ u.email }}</td>
+                <td>{{ u.role }}</td>
+                <td class="actions">
+                  <button (click)="edit(u)">Editar</button>
+                  <button class="danger" (click)="remove(u)">Eliminar</button>
+                </td>
+              </tr>
+            }
+            @if (users.length === 0) {
+              <tr><td colspan="4">No hay usuarios.</td></tr>
+            }
           </tbody>
         </table>
       </div>
     </div>
-  `,
+    `
 })
 export class UsersComponent implements OnInit {
   users: AppUser[] = [];

@@ -1,14 +1,13 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { RouterLink } from '@angular/router';
 import { CourseService } from '../../services/course.service';
 import { UserService } from '../../services/user.service';
 
 @Component({
-  selector: 'app-dashboard',
-  standalone: true,
-  imports: [CommonModule, RouterLink],
-  template: `
+    selector: 'app-dashboard',
+    imports: [RouterLink],
+    template: `
     <div class="container">
       <h1>Dashboard</h1>
       <div class="row">
@@ -23,9 +22,11 @@ import { UserService } from '../../services/user.service';
           <a routerLink="/usuarios">Gestionar usuarios &rarr;</a>
         </div>
       </div>
-      <p class="error" *ngIf="error">{{ error }}</p>
+      @if (error) {
+        <p class="error">{{ error }}</p>
+      }
     </div>
-  `,
+    `
 })
 export class DashboardComponent implements OnInit {
   totalCourses = 0;

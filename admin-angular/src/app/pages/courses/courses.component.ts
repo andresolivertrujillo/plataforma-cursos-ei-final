@@ -1,17 +1,20 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { CourseService, Course } from '../../services/course.service';
 
 @Component({
-  selector: 'app-courses',
-  standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
-  template: `
+    selector: 'app-courses',
+    imports: [ReactiveFormsModule],
+    template: `
     <div class="container">
       <h1>Gestion de cursos (CRUD)</h1>
-      <p class="error" *ngIf="error">{{ error }}</p>
-      <p class="success" *ngIf="message">{{ message }}</p>
+      @if (error) {
+        <p class="error">{{ error }}</p>
+      }
+      @if (message) {
+        <p class="success">{{ message }}</p>
+      }
 
       <div class="card">
         <h3>{{ editingId ? 'Editar curso' : 'Nuevo curso' }}</h3>
@@ -31,7 +34,9 @@ import { CourseService, Course } from '../../services/course.service';
           <label>Descripcion <input formControlName="description" /></label>
           <div class="actions" style="margin-top:12px">
             <button type="submit" [disabled]="form.invalid">{{ editingId ? 'Actualizar' : 'Crear' }}</button>
-            <button type="button" class="secondary" *ngIf="editingId" (click)="cancelEdit()">Cancelar</button>
+            @if (editingId) {
+              <button type="button" class="secondary" (click)="cancelEdit()">Cancelar</button>
+            }
           </div>
         </form>
       </div>
@@ -42,23 +47,27 @@ import { CourseService, Course } from '../../services/course.service';
             <tr><th>Titulo</th><th>Categoria</th><th>Docente</th><th>Cred.</th><th>Cap.</th><th>Acciones</th></tr>
           </thead>
           <tbody>
-            <tr *ngFor="let c of courses">
-              <td>{{ c.title }}</td>
-              <td>{{ c.category }}</td>
-              <td>{{ c.instructor }}</td>
-              <td>{{ c.credits }}</td>
-              <td>{{ c.capacity }}</td>
-              <td class="actions">
-                <button (click)="edit(c)">Editar</button>
-                <button class="danger" (click)="remove(c)">Eliminar</button>
-              </td>
-            </tr>
-            <tr *ngIf="courses.length === 0"><td colspan="6">No hay cursos.</td></tr>
+            @for (c of courses; track c) {
+              <tr>
+                <td>{{ c.title }}</td>
+                <td>{{ c.category }}</td>
+                <td>{{ c.instructor }}</td>
+                <td>{{ c.credits }}</td>
+                <td>{{ c.capacity }}</td>
+                <td class="actions">
+                  <button (click)="edit(c)">Editar</button>
+                  <button class="danger" (click)="remove(c)">Eliminar</button>
+                </td>
+              </tr>
+            }
+            @if (courses.length === 0) {
+              <tr><td colspan="6">No hay cursos.</td></tr>
+            }
           </tbody>
         </table>
       </div>
     </div>
-  `,
+    `
 })
 export class CoursesComponent implements OnInit {
   courses: Course[] = [];
