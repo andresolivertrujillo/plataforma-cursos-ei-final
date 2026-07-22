@@ -27,7 +27,17 @@ import { UserService, AppUser } from '../../services/user.service';
                 <option value="admin">Administrador</option>
               </select>
             </label>
-            <label *ngIf="!editingId">Contrasena <input type="password" formControlName="password" /></label>
+            <label *ngIf="!editingId">Contrasena
+              <input type="password" formControlName="password" />
+              <small
+                class="error"
+                *ngIf="(form.get('password')?.touched || submitted) && form.get('password')?.hasError('required')"
+              >La contrasena es obligatoria.</small>
+              <small
+                class="error"
+                *ngIf="(form.get('password')?.touched || submitted) && !form.get('password')?.hasError('required') && form.get('password')?.hasError('minlength')"
+              >La contrasena debe tener al menos 6 caracteres.</small>
+            </label>
           </div>
           <div class="actions" style="margin-top:12px">
             <button type="submit" [disabled]="form.invalid">{{ editingId ? 'Actualizar' : 'Crear' }}</button>
@@ -61,13 +71,14 @@ export class UsersComponent implements OnInit {
   editingId: string | null = null;
   error = '';
   message = '';
+  submitted = false;
 
   private fb = inject(FormBuilder);
   form = this.fb.group({
     name: ['', Validators.required],
     email: ['', [Validators.required, Validators.email]],
     role: ['student', Validators.required],
-    password: ['', [Validators.minLength(6)]],
+    password: ['', [Validators.required, Validators.minLength(6)]],
   });
 
   constructor(private srv: UserService) {}
@@ -84,7 +95,11 @@ export class UsersComponent implements OnInit {
   }
 
   save() {
-    if (this.form.invalid) return;
+    this.submitted = true;
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
     const v = this.form.value;
     if (this.editingId) {
       this.srv.update(this.editingId, { name: v.name!, email: v.email!, role: v.role! }).subscribe({
@@ -101,16 +116,18 @@ export class UsersComponent implements OnInit {
 
   edit(u: AppUser) {
     this.editingId = u._id!;
-    this.form.patchValue({ name: u.name, email: u.email, role: u.role });
-    this.form.get('password')?.clearValidators();
+    this.submitted = false;
+    this.form.patchValue({ name: u.name, email: u.email, role: u.role, password: '' });
+    this.form.get('password')?.setValidators([Validators.minLength(6)]);
     this.form.get('password')?.updateValueAndValidity();
     this.message = '';
   }
 
   cancelEdit() {
     this.editingId = null;
+    this.submitted = false;
     this.form.reset({ role: 'student' });
-    this.form.get('password')?.setValidators([Validators.minLength(6)]);
+    this.form.get('password')?.setValidators([Validators.required, Validators.minLength(6)]);
     this.form.get('password')?.updateValueAndValidity();
   }
 
