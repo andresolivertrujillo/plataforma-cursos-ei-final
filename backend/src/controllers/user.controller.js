@@ -26,12 +26,17 @@ export async function createUser(req, res, next) {
 // PUT /api/users/:id  (solo admin)
 export async function updateUser(req, res, next) {
   try {
-    const { name, email, role } = req.body;
-    const user = await User.findByIdAndUpdate(
-      req.params.id,
-      { name, email, role },
-      { new: true, runValidators: true }
-    );
+    // Solo se actualizan los campos realmente enviados; nunca la contrasena
+    // desde aqui (para eso deberia existir un flujo dedicado con hash propio).
+    const updates = {};
+    for (const field of ['name', 'email', 'role']) {
+      if (req.body[field] !== undefined) updates[field] = req.body[field];
+    }
+
+    const user = await User.findByIdAndUpdate(req.params.id, updates, {
+      new: true,
+      runValidators: true,
+    });
     if (!user) return res.status(404).json({ message: 'Usuario no encontrado' });
     res.json({ id: user._id, name: user.name, email: user.email, role: user.role });
   } catch (err) {

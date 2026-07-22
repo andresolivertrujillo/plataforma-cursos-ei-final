@@ -15,6 +15,10 @@ export function errorHandler(err, req, res, next) {
     const errors = Object.values(err.errors).map((e) => e.message);
     return res.status(400).json({ message: 'Datos invalidos', errors });
   }
+  // Identificador de MongoDB con formato invalido (ej. /api/courses/abc123)
+  if (err.name === 'CastError') {
+    return res.status(400).json({ message: `Identificador invalido: ${err.value}` });
+  }
 
   const status = err.status || 500;
   res.status(status).json({ message: err.message || 'Error interno del servidor' });

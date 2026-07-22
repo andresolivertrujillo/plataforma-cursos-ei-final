@@ -15,6 +15,9 @@
 | 11 | Rutas protegidas por rol en el front | Implementado | Angular `adminGuard`, React `ProtectedRoute` |
 | 12 | Proteccion basica XSS | Mitigado | Helmet + React/Angular escapan el HTML por defecto |
 | 13 | Proteccion CSRF | Mitigado | JWT en header Authorization (no cookies de sesion), CORS restringido |
+| 14 | Validacion de identificadores de MongoDB | Implementado | `middlewares/validateObjectId.js` en rutas `:id`, mas `CastError` en `errorHandler.js` como respaldo |
+| 15 | Validacion de datos en actualizaciones (PUT) | Implementado | `courseUpdateValidations` en `course.routes.js`, `userUpdateValidations` en `user.routes.js` |
+| 16 | Whitelist de campos actualizables | Implementado | `updateCourse` y `updateUser` solo aplican campos conocidos del modelo (evita inyeccion de campos no deseados) |
 
 ## Notas
 - No se guardan tokens en cookies; se usa `Authorization: Bearer`, lo que reduce el riesgo de CSRF.

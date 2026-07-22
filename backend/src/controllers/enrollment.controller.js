@@ -9,11 +9,30 @@ export async function enroll(req, res, next) {
     if (!course || !course.active) {
       return res.status(404).json({ message: 'Curso no disponible' });
     }
-    // Valida cupo
+
+    // Debido al indice unico {student, course}, si el estudiante ya tuvo
+    // una inscripcion previa a este curso (incluso cancelada), el documento
+    // sigue existiendo. Hay que reactivarlo en vez de crear uno nuevo,
+    // o el create() fallaria con un error de clave duplicada (11000).
+    const existing = await Enrollment.findOne({ student: req.user.id, course: courseId });
+
+    if (existing && existing.status === 'inscrito') {
+      return res.status(409).json({ message: 'Ya estas inscrito en este curso' });
+    }
+
+    // Valida cupo (no cuenta la propia inscripcion cancelada que se va a reactivar)
     const count = await Enrollment.countDocuments({ course: courseId, status: 'inscrito' });
     if (count >= course.capacity) {
       return res.status(409).json({ message: 'El curso no tiene cupos disponibles' });
     }
+
+    if (existing) {
+      // Reactiva la inscripcion cancelada (o completada) en lugar de duplicarla
+      existing.status = 'inscrito';
+      await existing.save();
+      return res.status(201).json(existing);
+    }
+
     const enrollment = await Enrollment.create({
       student: req.user.id,
       course: courseId,
