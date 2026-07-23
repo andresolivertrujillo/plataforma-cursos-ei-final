@@ -1,156 +1,242 @@
 # Plataforma de Gestión de Cursos e Inscripciones
 
-Proyecto integrador full stack — **Programación Web II (Código 30690)** — Evaluación Integral Final.
+Proyecto integrador full stack de Programación Web II. La solución permite publicar un catálogo de cursos, autenticar estudiantes y administradores, gestionar inscripciones y administrar cursos y usuarios desde aplicaciones independientes conectadas a una API REST común.
 
-Aplicación web moderna que articula **TypeScript, Angular, React, Next.js, Node.js, Express y MongoDB**, con autenticación JWT, gestión de estado, despliegue en la nube y controles básicos de seguridad.
+## Integrantes
 
----
+- Andrés Oliver Trujillo Torres
+- Diego Gallardo Sánchez
+- Gabriela Fumiko Furukawa Oki
+- Misha Reuven Quito
+- Diego Fernando Salva Puerta
 
-## 1. Descripción y problema
+La distribución de responsabilidades se documenta en [docs/distribucion-trabajo.md](docs/distribucion-trabajo.md).
 
-Las instituciones necesitan una plataforma donde los **estudiantes** puedan consultar un catálogo de cursos e inscribirse, y donde un **administrador** gestione los cursos y usuarios. Este proyecto resuelve ese flujo de principio a fin: registro/login → catálogo → inscripción → visualización de inscripciones → administración → persistencia en MongoDB Atlas.
+## Arquitectura
 
-## 2. Objetivos
+El repositorio es un monorepo con cuatro aplicaciones desplegadas de forma independiente:
 
-- Autenticación segura con JWT y autorización por roles (admin / student).
-- Catálogo con búsqueda e inscripción de estudiantes.
-- Panel del estudiante con sus inscripciones.
-- Panel administrativo con CRUD de cursos y usuarios.
-- Persistencia real en MongoDB Atlas.
-- Despliegue en Vercel + Render + Atlas con buenas prácticas de seguridad.
+| Módulo | Tecnologías principales | Responsabilidad | Despliegue |
+|---|---|---|---|
+| `public-next/` | Next.js 16, React 19, App Router | Portada, catálogo público y detalle de cursos con SSG/ISR | Vercel |
+| `student-react/` | React 18, Vite 8, React Router, Context API | Catálogo, autenticación, detalle e inscripciones del estudiante | Vercel |
+| `admin-angular/` | Angular 21, TypeScript, RxJS, formularios reactivos | Dashboard y CRUD administrativo de cursos y usuarios | Vercel |
+| `backend/` | Node.js, Express 4, Mongoose 8, JWT | API REST, autenticación, autorización y persistencia | Render |
+| Base de datos | MongoDB Atlas | Usuarios, cursos e inscripciones | MongoDB Atlas |
 
-## 3. Arquitectura
-
-Cuatro aplicaciones independientes que consumen una API REST única. Ver diagrama en [`/docs/arquitectura.md`](docs/arquitectura.md).
-
-| App | Tecnología | Carpeta | Despliegue |
-|-----|-----------|---------|------------|
-| Sitio público (catálogo) | Next.js (App Router, SSR/ISR/SSG) | `public-next/` | Vercel |
-| Portal del estudiante (SPA) | React + Vite + Context API | `student-react/` | Vercel |
-| Panel administrativo | Angular + TypeScript (standalone) | `admin-angular/` | Vercel |
-| API REST | Node.js + Express + Mongoose | `backend/` | Render |
-| Base de datos | MongoDB Atlas | — | MongoDB Atlas |
-
-## 4. Tecnologías
-
-`TypeScript` · `Angular 17` · `React 18` · `Next.js 14` · `Node.js` · `Express` · `MongoDB` · `Mongoose` · `JWT` · `bcrypt` · `Helmet` · `express-validator` · `Vite`
-
-## 5. Integrantes
-
-| Nombre completo |
-|-----------------|
-| Andrés Oliver Trujillo Torres |
-| Diego Gallardo Sánchez |
-| Gabriela Fumiko Furukawa Oki |
-| Misha Reuven Quito |
-| Diego Fernando Salva Puerta |
-
-## Distribución inicial del trabajo
-
-Diego Gallardo Sánchez desarrolló y proporcionó la estructura base inicial del proyecto.
-
-Andrés Oliver Trujillo Torres realizó la preparación de la carpeta, la revisión de seguridad, la configuración inicial y la publicación del repositorio grupal.
-
-Las mejoras, correcciones, documentación y despliegues restantes serán distribuidos entre los cinco integrantes mediante ramas y commits individuales.
-
-La distribución detallada de responsabilidades y ramas se encuentra en [docs/distribucion-trabajo.md](docs/distribucion-trabajo.md).
-
-## 6. Instalación local
-
-Requisitos: Node.js 18+ y una cuenta de MongoDB Atlas.
-
-```bash
-# 1) Backend
-cd backend
-cp .env.example .env         # completa MONGODB_URI y JWT_SECRET
-npm install
-npm run seed                 # crea admin, estudiante demo y cursos
-npm run dev                  # http://localhost:4000
-
-# 2) Portal del estudiante (React)
-cd ../student-react
-cp .env.example .env         # VITE_API_URL=http://localhost:4000/api
-npm install
-npm run dev                  # http://localhost:5173
-
-# 3) Panel administrativo (Angular)
-cd ../admin-angular
-npm install
-# edita src/environments/environment.ts con la URL de la API
-npm start                    # http://localhost:4200
-
-# 4) Sitio público (Next.js)
-cd ../public-next
-cp .env.example .env         # NEXT_PUBLIC_API_URL=http://localhost:4000/api
-npm install
-npm run dev                  # http://localhost:3000
+```mermaid
+flowchart LR
+    N[Next.js público] --> API[API Node/Express]
+    R[React estudiante] --> API
+    A[Angular administrador] --> API
+    API --> DB[(MongoDB Atlas)]
 ```
 
-## 7. Variables de entorno
+La arquitectura ampliada está en [docs/arquitectura.md](docs/arquitectura.md) y el detalle de módulos en [docs/modulos.md](docs/modulos.md).
 
-Cada app trae su `.env.example`. **Nunca subas el `.env` real.**
+## Aplicaciones desplegadas
 
-- **backend**: `PORT`, `MONGODB_URI`, `JWT_SECRET`, `JWT_EXPIRES_IN`, `CORS_ORIGINS`, `SEED_ADMIN_NAME`, `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD`, `SEED_STUDENT_NAME`, `SEED_STUDENT_EMAIL`, `SEED_STUDENT_PASSWORD`
-- **student-react**: `VITE_API_URL`
-- **public-next**: `NEXT_PUBLIC_API_URL`
-- **admin-angular**: `src/environments/environment.ts` → `apiUrl`
+| Aplicación | URL de producción |
+|---|---|
+| Backend Node/Express | https://plataforma-cursos-ei-api.onrender.com |
+| Sitio público Next.js | https://plataforma-cursos-ei-public.vercel.app |
+| Portal del estudiante React | https://plataforma-cursos-ei-student.vercel.app |
+| Panel administrativo Angular | https://plataforma-cursos-ei-admin.vercel.app |
 
-## 8. Credenciales de prueba
+## Módulos y funcionamiento
 
-| Rol | Correo | Contraseña |
-|-----|--------|-----------|
-| Administrador | Pendiente | Pendiente |
-| Estudiante | Pendiente | Pendiente |
+### Next.js público
 
-> Las credenciales públicas de evaluación se añadirán después del despliegue.
+- `/`: portada estática.
+- `/cursos`: catálogo público con regeneración incremental.
+- `/cursos/[id]`: detalle prerenderizado de cada curso.
+- Consume únicamente endpoints públicos del backend y no requiere autenticación.
 
-## 9. Endpoints principales
+### React estudiante
 
-| Método | Ruta | Acceso | Descripción |
-|--------|------|--------|-------------|
-| POST | `/api/auth/register` | Público | Registro de estudiante |
-| POST | `/api/auth/login` | Público | Login (devuelve JWT) |
-| GET | `/api/auth/me` | Autenticado | Perfil actual |
-| GET | `/api/courses` | Público | Listar/buscar cursos |
-| GET | `/api/courses/:id` | Público | Detalle de curso |
-| POST | `/api/courses` | Admin | Crear curso |
-| PUT | `/api/courses/:id` | Admin | Editar curso |
-| DELETE | `/api/courses/:id` | Admin | Eliminar curso |
-| POST | `/api/enrollments` | Estudiante | Inscribirse |
-| GET | `/api/enrollments/mine` | Estudiante | Mis inscripciones |
-| DELETE | `/api/enrollments/:id` | Estudiante | Cancelar inscripción |
-| GET | `/api/enrollments` | Admin | Todas las inscripciones |
-| GET/POST/PUT/DELETE | `/api/users` | Admin | CRUD de usuarios |
+- Catálogo y detalle público de cursos.
+- Login y registro de estudiantes.
+- Ruta protegida `/mis-inscripciones`.
+- Context API mantiene el usuario autenticado y recupera la sesión con `/api/auth/me`.
+- Las rutas protegidas validan el rol `student`; un administrador recibe una pantalla de acceso restringido.
 
-Colección lista para importar en Postman/Thunder Client: [`/docs/postman_collection.json`](docs/postman_collection.json).
+### Angular administrador
 
-## 10. URLs desplegadas
+- Login exclusivo para administradores.
+- Dashboard con cantidades de cursos y usuarios.
+- CRUD de cursos y usuarios con formularios reactivos.
+- Guard de rutas para el rol `admin` e interceptor HTTP para enviar el JWT.
+- Las recargas directas se resuelven mediante la reescritura SPA configurada en Vercel.
 
-| App | URL |
-|-----|-----|
-| Sitio público (Next.js) | `https://________.vercel.app` |
-| Portal estudiante (React) | `https://________.vercel.app` |
-| Panel admin (Angular) | `https://________.vercel.app` |
-| API (Render) | `https://________.onrender.com` |
+### Backend Node/Express
 
-> Completar tras el despliegue.
+- Endpoints públicos de salud y consulta de cursos.
+- Autenticación JWT y autorización por roles.
+- Validación con `express-validator` y modelos Mongoose.
+- Contraseñas almacenadas como hash con bcrypt y excluidas de las respuestas normales.
+- Seguridad con Helmet, CORS por lista blanca y límite de solicitudes.
 
-## 11. Video de exposición
+## Autenticación y roles
 
-📹 **Enlace de YouTube:** `https://youtu.be/________`
+El login devuelve un JWT firmado que contiene la identidad y el rol. React y Angular guardan temporalmente el token en `localStorage` y lo envían como `Authorization: Bearer <token>` en solicitudes protegidas.
 
-(12–15 min, todos los integrantes con cámara prendida.)
+- `student`: puede acceder a sus inscripciones y solicitar una inscripción.
+- `admin`: puede administrar cursos y usuarios.
+- El backend valida el token con `verifyToken` y aplica autorización con `requireRole`.
+- Una sesión ausente o inválida produce 401; un rol no autorizado produce 403 o una redirección controlada en el frontend.
 
-## 12. Documentación técnica
+## Instalación local
 
-Carpeta [`/docs`](docs): arquitectura, modelo de datos, decisiones técnicas, checklist de seguridad, colección Postman y reporte Lighthouse.
+Requisitos: Node.js compatible con cada `package.json`, npm y acceso a una base MongoDB.
 
-## 13. Capturas
+```bash
+git clone https://github.com/andresolivertrujillo/plataforma-cursos-ei-final.git
+cd plataforma-cursos
+```
 
-> Agrega aquí capturas de: catálogo, login, inscripción, panel del estudiante y panel admin.
+### Backend
 
----
+```bash
+cd backend
+cp .env.example .env
+npm ci
+npm run dev
+```
 
-## Guía paso a paso de despliegue y entrega
+La API local usa el puerto 4000. El seed es opcional y debe ejecutarse una sola vez en una base preparada:
 
-Ver [`GUIA_PASO_A_PASO.md`](GUIA_PASO_A_PASO.md).
+```bash
+npm run seed
+```
+
+### Sitio público Next.js
+
+```bash
+cd public-next
+cp .env.example .env.local
+npm ci
+npm run dev
+```
+
+### Portal React
+
+```bash
+cd student-react
+cp .env.example .env
+npm ci
+npm run dev
+```
+
+### Panel Angular
+
+```bash
+cd admin-angular
+npm ci
+npm start
+```
+
+El entorno local de Angular se define en `src/environments/environment.ts`; producción usa `environment.prod.ts` mediante `fileReplacements`.
+
+## Variables de entorno requeridas
+
+Los archivos reales `.env` no deben publicarse. Configura únicamente los valores en el entorno local o en el proveedor de despliegue.
+
+### Backend
+
+- `PORT`
+- `MONGODB_URI`
+- `JWT_SECRET`
+- `JWT_EXPIRES_IN`
+- `CORS_ORIGINS`
+- `SEED_ADMIN_NAME`
+- `SEED_ADMIN_EMAIL`
+- `SEED_ADMIN_PASSWORD`
+- `SEED_STUDENT_NAME`
+- `SEED_STUDENT_EMAIL`
+- `SEED_STUDENT_PASSWORD`
+
+### Next.js público
+
+- `NEXT_PUBLIC_API_URL`
+
+### React estudiante
+
+- `VITE_API_URL`
+
+### Angular administrador
+
+Angular utiliza `apiUrl` en sus archivos `environment.ts` y `environment.prod.ts`; no requiere una variable de entorno adicional en Vercel con la configuración actual.
+
+## Credenciales de prueba
+
+Las credenciales no se publican en el repositorio. Para obtenerlas:
+
+1. Solicítalas al responsable del proyecto por un canal privado; o
+2. consulta localmente las variables `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD`, `SEED_STUDENT_EMAIL` y `SEED_STUDENT_PASSWORD` del archivo `backend/.env` autorizado.
+
+Nunca copies contraseñas, tokens, URI de MongoDB ni secretos JWT en documentación, capturas, issues o commits.
+
+## Uso básico
+
+1. Abre el sitio público para consultar los cursos sin iniciar sesión.
+2. En el portal React, inicia sesión como estudiante para acceder a **Mis inscripciones**.
+3. En el panel Angular, inicia sesión como administrador para gestionar cursos y usuarios.
+4. Usa **Salir** para eliminar la sesión local; las rutas protegidas vuelven al login.
+
+## Endpoints principales
+
+| Método | Ruta | Acceso |
+|---|---|---|
+| GET | `/` | Público |
+| GET | `/api/health` | Público |
+| POST | `/api/auth/register` | Público |
+| POST | `/api/auth/login` | Público |
+| GET | `/api/auth/me` | Autenticado |
+| GET | `/api/courses` | Público |
+| GET | `/api/courses/:id` | Público |
+| POST / PUT / DELETE | `/api/courses` | Admin |
+| POST | `/api/enrollments` | Student |
+| GET | `/api/enrollments/mine` | Student |
+| GET | `/api/enrollments` | Admin |
+| GET / POST / PUT / DELETE | `/api/users` | Admin |
+
+La colección de pruebas está en [docs/postman_collection.json](docs/postman_collection.json).
+
+## Auditoría Lighthouse
+
+Reportes generados con Lighthouse 13.4.1, modo escritorio:
+
+| Aplicación | Performance | Accessibility | Best Practices | SEO | Agentic Browsing |
+|---|---:|---:|---:|---:|---:|
+| Next.js público | 100 | 98 | 96 | 100 | 100 |
+| React estudiante | 100 | 97 | 100 | 82 | 67 |
+| Angular administrador | 100 | 96 | 100 | 82 | 67 |
+
+Reportes HTML:
+
+- [public-next.html](docs/lighthouse/public-next.html)
+- [student-react.html](docs/lighthouse/student-react.html)
+- [admin-angular.html](docs/lighthouse/admin-angular.html)
+
+La metodología y observaciones están en [docs/lighthouse.md](docs/lighthouse.md).
+
+## Estructura principal
+
+```text
+plataforma-cursos/
+├── backend/             API REST, modelos, rutas, controladores y seed
+├── public-next/         sitio público Next.js
+├── student-react/       portal React del estudiante
+├── admin-angular/       panel administrativo Angular
+├── docs/                arquitectura, seguridad, API y Lighthouse
+├── README.md            guía principal
+└── GUIA_PASO_A_PASO.md guía complementaria de despliegue y entrega
+```
+
+## Verificación final
+
+- Los tres frontends compilan correctamente en modo producción.
+- El backend desplegado responde en `/`, `/api/health` y `/api/courses`.
+- Las rutas internas de las SPA soportan recarga directa.
+- Las restricciones de rol y logout fueron comprobadas en producción.
+- La base final contiene 2 usuarios, 5 cursos y 0 inscripciones.

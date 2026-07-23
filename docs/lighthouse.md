@@ -1,26 +1,33 @@
-# Auditoria Lighthouse
+# Auditoría Lighthouse
 
-> Reemplaza esta seccion con tu reporte real despues de desplegar.
+La auditoría final se ejecutó sobre los tres frontends desplegados después de despertar el backend de Render.
 
-## Como generar el reporte
-1. Abre la URL publica del portal (React en Vercel) en Chrome (ventana de incognito).
-2. Abre DevTools (F12) > pestana **Lighthouse**.
-3. Selecciona categorias: Performance, Accessibility, Best Practices, SEO.
-4. Modo: Navigation. Dispositivo: Desktop o Mobile.
-5. Click en **Analyze page load**.
-6. Exporta el reporte (boton de los tres puntos > Save as HTML/JSON) o toma captura.
-7. Guarda el archivo en esta carpeta `/docs` (ej. `lighthouse-portal.html`).
+## Metodología
 
-## Resultados (ejemplo a completar)
+- Lighthouse: 13.4.1.
+- Modalidad: navegación.
+- Dispositivo: escritorio (`desktop`).
+- URLs públicas desplegadas en Vercel.
+- Reportes guardados en formato HTML dentro de `docs/lighthouse/`.
 
-| Categoria | Puntaje | Observacion |
-|-----------|---------|-------------|
-| Performance | __ /100 | |
-| Accessibility | __ /100 | |
-| Best Practices | __ /100 | |
-| SEO | __ /100 | |
+## Resultados
 
-## Mejoras aplicadas
-- (Ejemplo) Se agregaron atributos alt a imagenes.
-- (Ejemplo) Se corrigio el contraste de colores.
-- (Ejemplo) Se agrego meta description en Next.js.
+| Aplicación | Performance | Accessibility | Best Practices | SEO | Agentic Browsing |
+|---|---:|---:|---:|---:|---:|
+| Next.js público | 100 | 98 | 96 | 100 | 100 |
+| React estudiante | 100 | 97 | 100 | 82 | 67 |
+| Angular administrador | 100 | 96 | 100 | 82 | 67 |
+
+## Reportes HTML
+
+- [Next.js público](lighthouse/public-next.html)
+- [React estudiante](lighthouse/student-react.html)
+- [Angular administrador](lighthouse/admin-angular.html)
+
+## Observaciones
+
+- Las tres aplicaciones obtuvieron 100 en rendimiento en la ejecución registrada.
+- Next.js alcanzó 100 en SEO; las SPA React y Angular obtuvieron 82 y pueden mejorar metadatos específicos para cada documento.
+- Accesibilidad se mantuvo entre 96 y 98; los detalles de cada oportunidad están incluidos en los reportes HTML.
+- El sitio público obtuvo 96 en buenas prácticas; el reporte correspondiente contiene las auditorías concretas pendientes.
+- La categoría Agentic Browsing forma parte de Lighthouse 13 y se conserva en el resumen para reflejar íntegramente la ejecución.
