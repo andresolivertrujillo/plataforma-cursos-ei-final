@@ -43,6 +43,12 @@ La arquitectura ampliada está en [docs/arquitectura.md](docs/arquitectura.md) y
 | Portal del estudiante React | https://plataforma-cursos-ei-student.vercel.app |
 | Panel administrativo Angular | https://plataforma-cursos-ei-admin.vercel.app |
 
+## Video de presentación
+
+El video de exposición del proyecto está disponible en YouTube:
+
+https://youtu.be/gr0QbwwYKeE
+
 ## Módulos y funcionamiento
 
 ### Next.js público
