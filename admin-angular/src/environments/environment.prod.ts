@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://REEMPLAZAR-BACKEND.onrender.com/api',
+  apiUrl: 'https://plataforma-cursos-ei-api.onrender.com/api',
 };
