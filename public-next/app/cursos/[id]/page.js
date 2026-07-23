@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
 import { getCourse, getCourses } from '@/lib/api';
 
 // Genera las paginas estaticas de cada curso en el build (SSG)
@@ -13,12 +14,7 @@ export default async function CursoDetalle({ params }) {
   const { id } = await params;
   const course = await getCourse(id);
   if (!course) {
-    return (
-      <div className="container">
-        <Link href="/cursos" className="back">&larr; Volver</Link>
-        <p>Curso no encontrado.</p>
-      </div>
-    );
+    notFound();
   }
   return (
     <div className="container">

@@ -25,8 +25,8 @@ export default function Login() {
 
     setLoading(true);
     try {
-      await login(email, password);
-      navigate('/');
+      const authenticatedUser = await login(email, password);
+      navigate(authenticatedUser.role === 'student' ? '/' : '/acceso-denegado', { replace: true });
     } catch (err) {
       setApiError(err.message);
     } finally {

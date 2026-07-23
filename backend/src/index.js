@@ -18,7 +18,10 @@ const app = express();
 app.use(helmet()); // cabeceras seguras (XSS, clickjacking, etc.)
 
 // CORS restringido a los origenes del .env
-const origins = (process.env.CORS_ORIGINS || '').split(',').map((o) => o.trim());
+const origins = (process.env.CORS_ORIGINS || '')
+  .split(',')
+  .map((o) => o.trim())
+  .filter(Boolean);
 app.use(
   cors({
     origin: (origin, cb) => {

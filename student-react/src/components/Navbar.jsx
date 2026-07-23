@@ -12,7 +12,7 @@ export default function Navbar() {
         <Link to="/">Catalogo</Link>
         {user ? (
           <>
-            <Link to="/mis-inscripciones">Mis inscripciones</Link>
+            {user.role === 'student' && <Link to="/mis-inscripciones">Mis inscripciones</Link>}
             <span className="user-name">Hola, {user.name}</span>
             <button onClick={() => { logout(); navigate('/login'); }}>Salir</button>
           </>

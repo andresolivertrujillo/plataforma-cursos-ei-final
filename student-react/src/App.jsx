@@ -7,11 +7,12 @@ import CourseDetail from './pages/CourseDetail';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import MyEnrollments from './pages/MyEnrollments';
+import AccessDenied from './pages/AccessDenied';
 
 export default function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Navbar />
         <main className="container">
           <Routes>
@@ -20,9 +21,17 @@ export default function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route
-              path="/mis-inscripciones"
+              path="/acceso-denegado"
               element={
                 <ProtectedRoute>
+                  <AccessDenied />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/mis-inscripciones"
+              element={
+                <ProtectedRoute requiredRole="student">
                   <MyEnrollments />
                 </ProtectedRoute>
               }
