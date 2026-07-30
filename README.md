@@ -2,6 +2,24 @@
 
 Proyecto integrador full stack de Programación Web II. La solución permite publicar un catálogo de cursos, autenticar estudiantes y administradores, gestionar inscripciones y administrar cursos y usuarios desde aplicaciones independientes conectadas a una API REST común.
 
+## Mi contribución
+
+Mi función principal dentro del equipo fue la **integración y entrega final del proyecto**. Mis responsabilidades verificadas fueron:
+
+- Revisión y mejora del sitio público desarrollado con Next.js.
+- Verificación y documentación del uso de SSG e ISR.
+- Despliegue del sitio público Next.js en Vercel.
+- Revisión e integración de los aportes del equipo mediante ramas y pull requests.
+- Elaboración y consolidación de la documentación final.
+- Ejecución y documentación de auditorías con Lighthouse.
+- Revisión final de despliegues, seguridad y funcionamiento general.
+
+El backend, el portal React y el panel Angular fueron desarrollados colaborativamente por los integrantes del equipo. Mi participación se centró en revisar, integrar y consolidar la solución para su entrega final, sin atribuirme el desarrollo individual de esos módulos.
+
+## Contexto del proyecto
+
+Este fue un proyecto integrador académico de **Programación Web II**, desarrollado en equipo con el objetivo de construir una plataforma completa de gestión de cursos. El trabajo abarcó aplicaciones frontend independientes, una API REST compartida, autenticación y autorización por roles, persistencia de datos y despliegues en producción.
+
 ## Integrantes
 
 - Andrés Oliver Trujillo Torres
@@ -97,7 +115,7 @@ Requisitos: Node.js compatible con cada `package.json`, npm y acceso a una base 
 
 ```bash
 git clone https://github.com/andresolivertrujillo/plataforma-cursos-ei-final.git
-cd plataforma-cursos
+cd plataforma-cursos-ei-final
 ```
 
 ### Backend
@@ -246,3 +264,13 @@ plataforma-cursos/
 - Las rutas internas de las SPA soportan recarga directa.
 - Las restricciones de rol y logout fueron comprobadas en producción.
 - La base final contiene 2 usuarios, 5 cursos y 0 inscripciones.
+
+## Documentación adicional
+
+- [Distribución del trabajo](docs/distribucion-trabajo.md)
+- [Arquitectura de la solución](docs/arquitectura.md)
+- [Detalle de módulos](docs/modulos.md)
+- [Metodología y observaciones de Lighthouse](docs/lighthouse.md)
+- [Checklist de seguridad](docs/checklist-seguridad.md)
+- [Colección de pruebas Postman](docs/postman_collection.json)
+- [Guía paso a paso de despliegue y entrega](GUIA_PASO_A_PASO.md)
